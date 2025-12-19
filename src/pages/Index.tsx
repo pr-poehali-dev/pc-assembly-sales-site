@@ -37,7 +37,7 @@ const components: Component[] = [
 const prebuiltConfigs = [
   {
     id: 'gaming-pro',
-    name: 'Gaming Pro',
+    name: 'Игровой Про',
     description: 'Идеальная сборка для AAA игр в 1440p',
     price: 150000,
     specs: ['Intel Core i7-13700K', 'NVIDIA RTX 4070', '32GB DDR5', '1TB NVMe'],
@@ -45,7 +45,7 @@ const prebuiltConfigs = [
   },
   {
     id: 'workstation',
-    name: 'Workstation',
+    name: 'Рабочая Станция',
     description: 'Мощная система для работы и рендеринга',
     price: 180000,
     specs: ['AMD Ryzen 7 7700X', 'NVIDIA RTX 4070', '32GB DDR5', '1TB NVMe'],
@@ -53,7 +53,7 @@ const prebuiltConfigs = [
   },
   {
     id: 'budget-gaming',
-    name: 'Budget Gaming',
+    name: 'Бюджетный Игровой',
     description: 'Оптимальная производительность за свои деньги',
     price: 95000,
     specs: ['AMD Ryzen 7 7700X', 'AMD RX 7800 XT', '32GB DDR4', '1TB NVMe'],
@@ -147,7 +147,7 @@ export default function Index() {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon name="Cpu" size={28} className="text-primary" />
-            <h1 className="text-2xl font-bold text-secondary">PCBuilder</h1>
+            <h1 className="text-2xl font-bold text-secondary">Сбор ПК</h1>
           </div>
           <div className="flex items-center gap-8">
             <button
@@ -174,17 +174,7 @@ export default function Index() {
             >
               Конфигуратор
             </button>
-            {compareConfigs.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCompare(true)}
-                className="relative"
-              >
-                <Icon name="GitCompare" size={16} className="mr-2" />
-                Сравнить ({compareConfigs.length})
-              </Button>
-            )}
+
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant={isRegistered ? "outline" : "default"}>
@@ -321,23 +311,13 @@ export default function Index() {
                         </div>
                       ))}
                     </div>
-                    <div className="space-y-3 pt-6 border-t border-border">
-                      <div className="flex items-center justify-between">
-                        <span className="text-3xl font-bold text-primary">
-                          {config.price.toLocaleString('ru-RU')} ₽
-                        </span>
-                        <Button>
-                          <Icon name="ShoppingCart" size={16} className="mr-2" />
-                          Купить
-                        </Button>
-                      </div>
-                      <Button
-                        variant={compareConfigs.includes(config.id) ? "default" : "outline"}
-                        className="w-full"
-                        onClick={() => toggleCompare(config.id)}
-                      >
-                        <Icon name="GitCompare" size={16} className="mr-2" />
-                        {compareConfigs.includes(config.id) ? 'Убрать из сравнения' : 'Сравнить'}
+                    <div className="flex items-center justify-between pt-6 border-t border-border">
+                      <span className="text-3xl font-bold text-primary">
+                        {config.price.toLocaleString('ru-RU')} ₽
+                      </span>
+                      <Button>
+                        <Icon name="ShoppingCart" size={16} className="mr-2" />
+                        Купить
                       </Button>
                     </div>
                   </div>
