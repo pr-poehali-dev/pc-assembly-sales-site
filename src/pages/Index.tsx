@@ -66,6 +66,8 @@ export default function Index() {
   const [selectedComponents, setSelectedComponents] = useState<{ [key: string]: Component }>({});
   const [isRegistered, setIsRegistered] = useState(false);
   const [userData, setUserData] = useState({ name: '', email: '', phone: '' });
+  const [compareConfigs, setCompareConfigs] = useState<string[]>([]);
+  const [showCompare, setShowCompare] = useState(false);
 
   const checkCompatibility = () => {
     const selected = Object.values(selectedComponents);
@@ -122,6 +124,21 @@ export default function Index() {
     toast.success('Регистрация успешна! Теперь вы можете собрать свой ПК');
   };
 
+  const toggleCompare = (configId: string) => {
+    setCompareConfigs(prev => {
+      if (prev.includes(configId)) {
+        return prev.filter(id => id !== configId);
+      }
+      if (prev.length >= 3) {
+        toast.error('Можно сравнить максимум 3 конфигурации');
+        return prev;
+      }
+      return [...prev, configId];
+    });
+  };
+
+  const comparedConfigs = prebuiltConfigs.filter(config => compareConfigs.includes(config.id));
+
   const compatibility = checkCompatibility();
 
   return (
@@ -157,6 +174,17 @@ export default function Index() {
             >
               Конфигуратор
             </button>
+            {compareConfigs.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCompare(true)}
+                className="relative"
+              >
+                <Icon name="GitCompare" size={16} className="mr-2" />
+                Сравнить ({compareConfigs.length})
+              </Button>
+            )}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant={isRegistered ? "outline" : "default"}>
@@ -293,13 +321,23 @@ export default function Index() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between pt-6 border-t border-border">
-                      <span className="text-3xl font-bold text-primary">
-                        {config.price.toLocaleString('ru-RU')} ₽
-                      </span>
-                      <Button>
-                        <Icon name="ShoppingCart" size={16} className="mr-2" />
-                        Купить
+                    <div className="space-y-3 pt-6 border-t border-border">
+                      <div className="flex items-center justify-between">
+                        <span className="text-3xl font-bold text-primary">
+                          {config.price.toLocaleString('ru-RU')} ₽
+                        </span>
+                        <Button>
+                          <Icon name="ShoppingCart" size={16} className="mr-2" />
+                          Купить
+                        </Button>
+                      </div>
+                      <Button
+                        variant={compareConfigs.includes(config.id) ? "default" : "outline"}
+                        className="w-full"
+                        onClick={() => toggleCompare(config.id)}
+                      >
+                        <Icon name="GitCompare" size={16} className="mr-2" />
+                        {compareConfigs.includes(config.id) ? 'Убрать из сравнения' : 'Сравнить'}
                       </Button>
                     </div>
                   </div>
@@ -477,6 +515,96 @@ export default function Index() {
           </div>
         </div>
       )}
+
+      <Dialog open={showCompare} onOpenChange={setShowCompare}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-3xl">Сравнение конфигураций</DialogTitle>
+          </DialogHeader>
+          
+          {comparedConfigs.length === 0 ? (
+            <div className="text-center py-12">
+              <Icon name="GitCompare" size={64} className="mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">Выберите конфигурации для сравнения в каталоге</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-4 px-4 font-semibold text-muted-foreground">Параметр</th>
+                    {comparedConfigs.map(config => (
+                      <th key={config.id} className="py-4 px-4">
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">{config.image}</div>
+                          <div className="text-xl font-bold text-secondary">{config.name}</div>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium">Описание</td>
+                    {comparedConfigs.map(config => (
+                      <td key={config.id} className="py-4 px-4 text-center text-sm text-muted-foreground">
+                        {config.description}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b hover:bg-muted/30">
+                    <td className="py-4 px-4 font-medium">Цена</td>
+                    {comparedConfigs.map(config => (
+                      <td key={config.id} className="py-4 px-4 text-center">
+                        <span className="text-2xl font-bold text-primary">
+                          {config.price.toLocaleString('ru-RU')} ₽
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                  {[0, 1, 2, 3].map(specIdx => (
+                    <tr key={specIdx} className="border-b hover:bg-muted/30">
+                      <td className="py-4 px-4 font-medium">
+                        {specIdx === 0 && 'Процессор'}
+                        {specIdx === 1 && 'Видеокарта'}
+                        {specIdx === 2 && 'Память'}
+                        {specIdx === 3 && 'Накопитель'}
+                      </td>
+                      {comparedConfigs.map(config => (
+                        <td key={config.id} className="py-4 px-4 text-center">
+                          {config.specs[specIdx] || '—'}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  <tr className="border-b">
+                    <td className="py-4 px-4 font-medium">Действия</td>
+                    {comparedConfigs.map(config => (
+                      <td key={config.id} className="py-4 px-4">
+                        <div className="flex flex-col gap-2">
+                          <Button className="w-full" size="sm">
+                            <Icon name="ShoppingCart" size={14} className="mr-2" />
+                            Купить
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => toggleCompare(config.id)}
+                          >
+                            <Icon name="X" size={14} className="mr-2" />
+                            Удалить
+                          </Button>
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
